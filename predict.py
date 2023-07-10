@@ -2,9 +2,17 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import tifffile as tiff
+import subprocess
+import os
+import sys
 
-from train_unet import weights_path, get_model, normalize, PATCH_SZ, N_CLASSES
+from train_unet import get_model, normalize, PATCH_SZ, N_CLASSES
 
+os.chdir('/home/jovyan/deep-unet-for-satellite-image-segmentation/weights/')
+weights_path = '/home/jovyan/deep-unet-for-satellite-image-segmentation/weights/' +  (str(subprocess.getoutput("ls -ltd * | awk '{print $9}' | head -n 1")) 
+                                                     if sys.argv[1] == "latest" else str(sys.argv[1]))
+print(weights_path)
+os.chdir('/')
 
 def predict(x, model, patch_sz=160, n_classes=5):
     img_height = x.shape[0]
@@ -70,9 +78,12 @@ def picture_from_mask(mask, threshold=0):
 if __name__ == '__main__':
     model = get_model()
     model.load_weights(weights_path)
-    test_id = 'test'
-    img = normalize(tiff.imread('data/mband/{}.tif'.format(test_id)).transpose([1,2,0]))   # make channels last
-
+    test_id = sys.argv[2]
+    img = tiff.imread('/home/jovyan/data/test/PS-RGB/{}'.format(test_id))
+    
+    plt.imshow(img)
+    plt.show()
+    img = normalize(tiff.imread('/home/jovyan/data/test/PS-RGB/{}'.format(test_id)))
     for i in range(7):
         if i == 0:  # reverse first dimension
             mymat = predict(img[::-1,:,:], model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
@@ -104,7 +115,7 @@ if __name__ == '__main__':
             print("Case 6", temp.shape, mymat.shape)
             mymat = np.mean( np.array([ np.rot90(temp, -3).transpose(2,0,1), mymat ]), axis=0 )
         else:
-            temp = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([2,0,1])
+            temp = predict(img, model, patch_sz=PATCH_SZ, n_classes=N_CLASSES).transpose([1,2,0])
             #print(temp[0][0][0], temp[3][12][13])
             print("Case 7", temp.shape, mymat.shape)
             mymat = np.mean( np.array([ temp, mymat ]), axis=0 )
@@ -115,5 +126,5 @@ if __name__ == '__main__':
     #map = picture_from_mask(mask, 0.5)
 
     #tiff.imsave('result.tif', (255*mask).astype('uint8'))
-    tiff.imsave('result.tif', (255*mymat).astype('uint8'))
-    tiff.imsave('map.tif', map)
+    tiff.imwrite('/home/jovyan/output/result.tif', (255*mymat).astype('uint8'))
+    tiff.imwrite('/home/jovyan/output/map.tif', map)

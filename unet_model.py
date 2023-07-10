@@ -3,7 +3,8 @@
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D, concatenate, Conv2DTranspose, BatchNormalization, Dropout
 from keras.optimizers import Adam
-from keras.utils import plot_model
+import tensorflow as tf
+from tensorflow.keras.utils import plot_model
 from keras import backend as K
 
 
@@ -105,6 +106,5 @@ def unet_model(n_classes=5, im_sz=160, n_channels=8, n_filters_start=32, growth_
     def weighted_binary_crossentropy(y_true, y_pred):
         class_loglosses = K.mean(K.binary_crossentropy(y_true, y_pred), axis=[0, 1, 2])
         return K.sum(class_loglosses * K.constant(class_weights))
-
     model.compile(optimizer=Adam(), loss=weighted_binary_crossentropy)
     return model
