@@ -21,12 +21,12 @@ def normalize(img):
 N_BANDS = 3
 N_CLASSES = 1  # buildings
 CLASS_WEIGHTS = [1]
-N_EPOCHS = 10000
+N_EPOCHS = 2500
 UPCONV = True
 PATCH_SZ = 160   # should divide by 16
-BATCH_SIZE = 50
-TRAIN_SZ = 800  # train size
-VAL_SZ = 200    # validation size
+BATCH_SIZE = 10
+TRAIN_SZ = 1500  # train size
+VAL_SZ = 500    # validation size
 
 
 def get_model():
@@ -44,7 +44,7 @@ weights_path += '/' + model_uuid + 'unet_weights.hdf5'
 trainIds = os.listdir('/home/jovyan/data/train/RGB-PanSharpen/')[:500]
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':     
     X_DICT_TRAIN = dict()
     Y_DICT_TRAIN = dict()
     X_DICT_VALIDATION = dict()
@@ -76,14 +76,14 @@ if __name__ == '__main__':
         if os.path.isfile(weights_path):
             model.load_weights(weights_path)
         #model_checkpoint = ModelCheckpoint(weights_path, monitor='val_loss', save_weights_only=True, save_best_only=True)
-        #early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto')
-        #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, patience=5, min_lr=0.00001)
+        early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto')
+        reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1, patience=5, min_lr=0.00001)
         model_checkpoint = ModelCheckpoint(weights_path, monitor='val_loss', save_best_only=True)
         csv_logger = CSVLogger('log_unet.csv', append=True, separator=';')
         tensorboard = TensorBoard(log_dir='./tensorboard_unet/', write_graph=True, write_images=True)
         model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=N_EPOCHS,
                   verbose=2, shuffle=True,
-                  callbacks=[model_checkpoint, csv_logger, tensorboard],
+                  callbacks=[model_checkpoint, csv_logger, tensorboard, early_stopping, reduce_lr],
                   validation_data=(x_val, y_val))
         return model
 

@@ -7,6 +7,8 @@ import tensorflow as tf
 from tensorflow.keras.utils import plot_model
 from keras import backend as K
 
+physical_devices = tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def unet_model(n_classes=5, im_sz=160, n_channels=8, n_filters_start=32, growth_factor=2, upconv=True,
                class_weights=[0.2, 0.3, 0.1, 0.1, 0.3]):
