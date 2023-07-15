@@ -21,7 +21,7 @@ def normalize(img):
 N_BANDS = 3
 N_CLASSES = 1  # buildings
 CLASS_WEIGHTS = [1]
-N_EPOCHS = 2500
+N_EPOCHS = 1500
 UPCONV = True
 PATCH_SZ = 160   # should divide by 16
 BATCH_SIZE = 10
