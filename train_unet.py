@@ -21,7 +21,7 @@ def normalize(img):
 N_BANDS = 3
 N_CLASSES = 1  # buildings
 CLASS_WEIGHTS = [1]
-N_EPOCHS = 1500
+N_EPOCHS = 100
 UPCONV = True
 PATCH_SZ = 160   # should divide by 16
 BATCH_SIZE = 10
@@ -41,7 +41,7 @@ else:
     print("Weights Folder Already Exists")
 model_uuid = str(uuid.uuid4())
 weights_path += '/' + model_uuid + 'unet_weights.hdf5'
-trainIds = os.listdir('/home/jovyan/data/train/RGB-PanSharpen/')[:500]
+trainIds = random.sample(os.listdir('/home/jovyan/data/train/RGB-PanSharpen/'),500)
 
 
 if __name__ == '__main__':     
